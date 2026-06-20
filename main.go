@@ -26,7 +26,6 @@ func parseArgs() (options, error) {
 	fs.BoolVar(&opts.json, "json", false, "Process response body as JSON")
 	fs.BoolVar(&opts.verbose, "verbose", false, "Output request and response headers")
 	fs.DurationVar(&opts.timeout, "timeout", 30*time.Second, "request timeout")
-	flag.Duration("timeout", opts.timeout, "Timeout for the request")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		return opts, fmt.Errorf("Failed to parse options: %v", err)
@@ -49,7 +48,7 @@ func main() {
 
 	code, err := run(opts)
 	if err != nil {
-		log.Fatalf("Fatal error: %v", err)
+		fmt.Fprintf(os.Stderr, "gofetch: %v\n", err)
 	}
 	os.Exit(code)
 }
