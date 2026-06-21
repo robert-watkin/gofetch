@@ -1,27 +1,75 @@
 # gofetch
 
-A small Go CLI project that fetches a URL and writes it to stdout. Various options are available to control the output format. Similar to `curl`.
+A minimal HTTP client (similar to `curl`). Fetches a URL over GET and streams the response body to stdout.
 
 ## Installation
 
 ```bash
-go get github.com/robert-watkin/gofetch
+go install github.com/robert-watkin/gofetch@latest
+```
+
+Or build from source:
+
+```bash
+git clone https://github.com/robert-watkin/gofetch
+cd gofetch
+go build .
 ```
 
 ## Usage
 
-```bash
+```
 gofetch [flags] URL
 ```
 
 ### Flags
 
-- `-header` or `-H`: Add a header to the request. Can be specified multiple times.
-- `-json`: Process the response body as JSON.
-- `-timeout`: Set the request timeout.
-- `-verbose`: Output request and response headers.
+- `-header value` (repeatable): Add a request header in `Name: value` form
+- `-timeout duration`: Request timeout (default `30s`)
+- `-json`: Only print the body for `application/json` responses; exit non-zero otherwise
+- `-verbose`: Print request and response headers to stderr (body stays on stdout)
 
-### Example
+## Examples
+
+Basic fetch:
 
 ```bash
-$ gofetch -json -verbose -header "X-API-Key: 1234567890" https://api.example.com/v1/users
+gofetch https://example.com
+gofetch https://httpbin.org/get | head -c 200
+```
+
+Repeatable headers:
+
+```bash
+gofetch --verbose \
+  --header "Accept: application/json" \
+  --header "X-Test: hello" \
+  https://httpbin.org/headers
+```
+
+JSON mode (exits 1 for non-JSON):
+
+```bash
+gofetch --json https://httpbin.org/json
+gofetch --json https://example.com; echo "exit=$?"
+```
+
+Timeout:
+
+```bash
+gofetch --timeout 1s https://httpbin.org/delay/3; echo $?
+gofetch --timeout 5s https://httpbin.org/delay/1; echo $?
+```
+
+## Exit codes
+
+- `0` — Success (2xx response and body written)
+- `1` — HTTP error (4xx/5xx) or `--json` validation failure
+- `2` — Network / timeout / usage error
+
+## Development
+
+```bash
+go build .
+go test -v -race ./...
+```
