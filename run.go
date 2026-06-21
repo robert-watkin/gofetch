@@ -44,16 +44,6 @@ func run(opts options) (int, error) {
 		return 2, err
 	}
 
-	// --verbose: response info goes to stderr
-	if opts.verbose {
-		fmt.Fprintf(os.Stderr, "< %s\n", resp.Status)
-		for key, values := range resp.Header {
-			for _, value := range values {
-				fmt.Fprintf(os.Stderr, "< %s: %s\n", key, value)
-			}
-		}
-	}
-
 	return 0, nil
 }
 
@@ -99,6 +89,16 @@ func fetch(ctx context.Context, opts options) (*http.Response, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, &NetworkError{URL: opts.url, Err: err}
+	}
+
+	// --verbose: response info goes to stderr
+	if opts.verbose {
+		fmt.Fprintf(os.Stderr, "< %s\n", resp.Status)
+		for key, values := range resp.Header {
+			for _, value := range values {
+				fmt.Fprintf(os.Stderr, "< %s: %s\n", key, value)
+			}
+		}
 	}
 
 	// Treat non-success as an error (using our custom type)
