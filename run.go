@@ -35,7 +35,7 @@ func run(opts options) (int, error) {
 			return 1, fmt.Errorf("failed to parse Content-Type: %w", err)
 		}
 		if mediaType != "application/json" {
-			return 1, fmt.Errorf("response body was not JSON (got %s)", mediaType)
+			return 1, fmt.Errorf("response body was not JSON (got %w)", mediaType)
 		}
 	}
 
@@ -75,12 +75,12 @@ func fetch(ctx context.Context, opts options) (*http.Response, error) {
 	for _, strHeader := range opts.headers {
 		parts := strings.SplitN(strHeader, ":", 2)
 		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid header format (must be Name: value): %s", strHeader)
+			return nil, fmt.Errorf("invalid header format (must be Name: value): %w", strHeader)
 		}
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
 		if key == "" || value == "" {
-			return nil, fmt.Errorf("invalid header (empty key or value): %s", strHeader)
+			return nil, fmt.Errorf("invalid header (empty key or value): %w", strHeader)
 		}
 		req.Header.Add(key, value)
 	}
@@ -108,7 +108,7 @@ func fetch(ctx context.Context, opts options) (*http.Response, error) {
 		return nil, &HttpError{
 			URL:        opts.url,
 			StatusCode: resp.StatusCode,
-			Err:        fmt.Errorf("HTTP %d", resp.StatusCode),
+			Err:        fmt.Errorf("HTTP %w", resp.StatusCode),
 		}
 	}
 
